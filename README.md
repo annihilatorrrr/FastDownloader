@@ -96,14 +96,15 @@ If your system isn't directly supported, try the `AppImage`.
 ![Main window - dark theme](https://raw.githubusercontent.com/BERNARDO31P/FastDownloader/master/resources/screenshot/main_dark.png)
 
 ## Libraries
-- [electron](https://www.npmjs.com/package/electron) -> 33.4.11
+- [electron](https://www.npmjs.com/package/electron) -> 39.2.0
 - [auto-launch](https://www.npmjs.com/package/auto-launch) -> 5.0.6
-- [electron-updater](https://www.npmjs.com/package/electron-updater) -> 6.6.2
+- [electron-updater](https://www.npmjs.com/package/electron-updater) -> 6.7.1
 - [fastest-levenshtein](https://www.npmjs.com/package/fastest-levenshtein) -> 1.0.16
-- [node-youtube-music](https://www.npmjs.com/package/node-youtube-music) -> 0.8.3
+- [ytmusic-api](https://www.npmjs.com/package/ytmusic-api) -> 5.3.0
 - [terminate](https://www.npmjs.com/package/terminate) -> 2.8.0
-- [youtube-sr](https://www.npmjs.com/package/youtube-sr) -> 4.3.11
+- [youtube-sr](https://www.npmjs.com/package/youtube-sr) -> 4.3.12
 
 ## Binaries
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) -> 20250626
-- [ffmpeg](https://ffmpeg.org) -> 202309
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) -> latest (automatic updates)
+- [ffmpeg windows](https://ffmpeg.org) -> 5.1.2
+- [ffmpeg linux](https://ffmpeg.org) -> 202309
