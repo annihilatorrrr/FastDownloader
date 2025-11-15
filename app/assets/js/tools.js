@@ -622,6 +622,61 @@ export async function setExtractors() {
     }
 }
 
+function installDeno() {
+    const denoInstallation = getCookie("deno");
+    if (denoInstallation && denoInstallation.length) {
+        return denoInstallation;
+    }
+
+    const platform = process.platform;
+
+    let result;
+
+    if (platform === "win32") {
+        // Windows PowerShell installer
+        result = spawnSync(
+            "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+            ["-Command", "irm https://deno.land/install.ps1 | iex"],
+            { stdio: "pipe" }
+        );
+    }
+    else if (platform === "linux" || platform === "darwin") {
+        // Linux / macOS installer (curl | sh)
+        result = spawnSync(
+            "/bin/sh",
+            ["-c", "curl -fsSL https://deno.land/install.sh | sh"],
+            { stdio: "pipe" }
+        );
+    }
+    else {
+        console.warn("Unsupported platform:", platform);
+        return null;
+    }
+
+    const stdout = result.stdout?.toString() ?? "";
+    const stderr = result.stderr?.toString() ?? "";
+
+    console.log("stdout:\n", stdout);
+    console.log("stderr:\n", stderr);
+
+    // Cross-platform path extraction:
+    // Windows: ...deno.exe
+    // Linux/Mac: ...deno
+    const match = stdout.match(/Deno was installed successfully to (.+deno(?:\.exe)?)/i);
+
+    if (match && match[1]) {
+        const denoPath = match[1].trim();
+        console.log("Deno installed at:", denoPath);
+
+        setCookie("deno", denoPath);
+
+        return denoPath;
+    }
+
+    console.warn("Deno installation output did not contain a path.");
+    return null;
+}
+
 // TODO: Comment
 function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, quality) {
     return new Promise(async (resolve) => {
@@ -662,8 +717,8 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
             "-o \"" + location + path.sep + title + ".%(ext)s\"",
             "--no-check-formats",
             "--no-check-certificates",
-            "--no-call-home",
-            "-N 2"
+            "-N 2",
+            "--extractor-args \"youtube:player_client=default,web_safari;player_js_version=actual\""
         ];
 
         if (mode === "audio") {
@@ -685,7 +740,6 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
             if (premium.browser && premium.browser.length) {
                 if (process.platform !== "win32" || premium.browser !== "chrome") {
                     config.push("--cookies-from-browser " + premium.browser);
-                    config.push("--extractor-args \"youtube:formats=missing_pot\"")
                 } else {
                     console.warn("Chrome is currently not supported on Windows for extracting cookies, continuing");
                 }
@@ -693,6 +747,13 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
                 showNotification(languageDB["js"]["noBrowser"]);
                 resolve(null);
             }
+        }
+
+        const denoPath = installDeno();
+        if (denoPath && denoPath.length) {
+            config.push("--js-runtimes deno:\"" + denoPath + "\"");
+        } else {
+            showNotification("Deno nicht gefunden");
         }
 
         let command = (ytDl + " " + config.join(" ")) + " " + url;
@@ -706,8 +767,12 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
 
             found = data.match("(?<=\\[download\\])(?:\\s+)(\\d+(\\.\\d+)?%)");
             if (found) {
-                progressSong.value = Number(found[1].replaceAll("%", "")) / 100;
-                progressSongInfo.textContent = found[1];
+                const percentageDecimal = Number(found[1].replaceAll("%", "")) / 100;
+
+                if (percentageDecimal > progressSong.value) {
+                    progressSong.value = percentageDecimal;
+                    progressSongInfo.textContent = found[1];
+                }
             }
         });
 
@@ -721,10 +786,6 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
             }
 
             data = data.toLowerCase();
-
-            if (data.includes("attempting to unlock cookies") || data.includes("po token")) {
-                return;
-            }
 
             if (!data.match(errorFilter)) {
                 error = true;

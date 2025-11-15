@@ -30,6 +30,11 @@ const keywordsErrors = [
     "winerror 10054",
     "aes-cbc",
     "[youtube]",
+    "attempting to unlock cookies",
+    "po token",
+    "formats may be missing",
+    "formats have been skipped",
+    "ffprobe"
 ];
 
 const ytFilter = new RegExp(keywordsYt.join("|"), 'gi');

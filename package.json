@@ -61,6 +61,10 @@
           "to": "ffmpeg.exe"
         },
         {
+          "from": "resources/ffprobe.exe",
+          "to": "ffprobe.exe"
+        },
+        {
           "from": "resources/yt-dlp.exe",
           "to": "yt-dlp.exe"
         },
