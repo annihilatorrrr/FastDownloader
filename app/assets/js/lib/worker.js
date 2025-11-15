@@ -1,6 +1,5 @@
 const yt = require("youtube-sr").default;
 const levenshtein = require("fastest-levenshtein");
-const ytMusic = require("node-youtube-music");
 
 import {ytFilter} from "./filter.js";
 
@@ -92,8 +91,22 @@ function getSortedLength(string1, string2) {
 // TODO: Comment
 async function getYouTubeMusicSearch(ytFullTitle, run = 0, retry = 5) {
     try {
-        let results = await ytMusic.searchMusics(ytFullTitle);
-        if (results) return results[0];
+        const results = await new Promise((resolve, reject) => {
+            const listener = (event) => {
+                const msg = event.data;
+
+                if (msg.type === "youTubeMusicSearchResults") {
+                    removeEventListener("message", listener);
+                    resolve(msg.results);
+                }
+            };
+            addEventListener('message', listener);
+
+            postMessage({type: "getYouTubeMusicSearch", search: ytFullTitle});
+        });
+
+        //    const results = await window.electron.invoke("yt-search", ytFullTitle);
+        if (results && results.length) return results[0];
     } catch (e) {
         if (run === retry) return [];
 

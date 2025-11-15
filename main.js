@@ -199,7 +199,24 @@ ipcMain.on("disableAutostart", () => {
     autoLauncher.isEnabled().then((isEnabled) => {
         if (isEnabled) autoLauncher.disable();
     });
-})
+});
+
+ipcMain.on("yt-search", async (event, search) => {
+    const ytMusic = await getYtMusic();
+
+    try {
+        const results = await ytMusic.searchMusics(search);
+
+        win.webContents.send("yt-results", results);
+    } catch (e) {
+        win.webContents.send("yt-results", []);
+    }
+});
+
+async function getYtMusic() {
+    // Dynamically import ESM module from CommonJS
+    return await import("node-youtube-music");
+}
 
 function closeToTray(event) {
     event.preventDefault();

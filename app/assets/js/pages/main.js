@@ -1,5 +1,5 @@
 import * as tools from "../tools.js";
-import {showNotification, specificSettings} from "../tools.js";
+import {showNotification, specificSettings, worker} from "../tools.js";
 const {spawnSync} = require("child_process");
 
 const terminate = require("terminate");
@@ -290,7 +290,7 @@ tools.bindEvent("click", ".startAbort .start-button:not([aria-disabled='true'])"
                 });
 
                 if (typeof specificSettings[item.textContent] !== "undefined") {
-                    for (let url of urls) {
+                    for (let url of allUrls) {
                         specificSettings[url] = specificSettings[item.textContent];
                     }
                     delete specificSettings[item.textContent];
@@ -537,6 +537,11 @@ ipcRenderer.on("clear", () => {
 // TODO: Comment
 ipcRenderer.on("location", () => {
     searchButton();
+});
+
+// TODO: Comment
+ipcRenderer.on("yt-results", (event, results) => {
+    worker.postMessage({type: "youTubeMusicSearchResults", results: results});
 });
 
 // TODO: Comment

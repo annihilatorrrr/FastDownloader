@@ -82,6 +82,9 @@ function sleep(ms) {
 worker.addEventListener("message", (event) => {
     const msg = event.data;
     switch (msg.type) {
+        case "getYouTubeMusicSearch":
+            ipcRenderer.send("yt-search", msg.search);
+            break;
         case "checkPremiumAndAdd":
             processedUrls.push(msg.data);
             workers--;
