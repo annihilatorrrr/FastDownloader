@@ -137,7 +137,11 @@ async function getYoutubeMusic(url) {
             ytFullTitle = ytArtist + " - " + ytTitle;
         } else {
             ytFullTitle = ytTitle;
-            ytTitle = ytTitle.split(delimiter)[1].replace(channelName, "");
+
+            const splitTitle = ytTitle.split(delimiter);
+
+            ytArtist = splitTitle[0].replace(channelName, "");
+            ytTitle = splitTitle[1].replace(channelName, "");
         }
 
         let music = await getYouTubeMusicSearch(ytFullTitle);
@@ -189,9 +193,9 @@ async function getYoutubeMusic(url) {
 
                 artists = music.artist.name.replace(/\(.*\)/gi, "");
 
-                const totalArtists = artists.split(",").length;
+                const totalArtists = artists.split(/,&/).length;
                 let foundArtists = 0;
-                for (let artist of artists.split(",")) {
+                for (let artist of artists.split(/,&/)) {
                     artist = artist.name;
 
                     if (contains(ytFullTitle, artist))
@@ -203,7 +207,7 @@ async function getYoutubeMusic(url) {
                     if (totalArtists > 2 && probability < 50) {
                         let length = getBiggerLength(ytArtist, artists);
 
-                        if (100 / length * (length - levenshtein.distance(ytArtist, artists)) < deviation) {
+                        if (ytArtist && 100 / length * (length - levenshtein.distance(ytArtist, artists)) < deviation) {
                             break find;
                         }
                     }
