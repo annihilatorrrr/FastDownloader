@@ -753,7 +753,7 @@ function downloadURL(mode, location, url, percentage, codecAudio, codecVideo, qu
         if (denoPath && denoPath.length) {
             config.push("--js-runtimes deno:\"" + denoPath + "\"");
         } else {
-            showNotification("Deno nicht gefunden");
+            console.warn("Couldn't find not install Deno, some YouTube formats may not work properly.");
         }
 
         let command = (ytDl + " " + config.join(" ")) + " " + url;
