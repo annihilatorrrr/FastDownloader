@@ -143,8 +143,6 @@ async function getYoutubeMusic(url) {
         let music = await getYouTubeMusicSearch(ytFullTitle);
         let artists = null, found = false;
 
-        console.log(music);
-
         find: {
             if (music && Object.keys(music).length) {
                 music.name = music.name.replace(ytFilter, "").trim();
@@ -152,7 +150,7 @@ async function getYoutubeMusic(url) {
                 let duration = result.duration / 1000;
                 if (contains(ytTitle, "(remix)")) {
                     if (!contains(music.name, "(remix)")) {
-                        if (subtractSmallerNumber(music.duration.totalSeconds, duration) > 2) {
+                        if (subtractSmallerNumber(music.duration, duration) > 2) {
                             break find;
                         }
 
@@ -160,9 +158,12 @@ async function getYoutubeMusic(url) {
                     }
                 }
 
-                /*if (subtractSmallerNumber(music.duration.totalSeconds, duration) > 6) {
+                const min = Math.min(music.duration, duration);
+                const max = Math.max(music.duration, duration);
+
+                if ((max - min) / max * 100 > 6) {
                     break find;
-                }*/
+                }
 
                 if (contains(music.name, delimiter)) {
                     let temp = music.name.split(delimiter);
@@ -186,16 +187,9 @@ async function getYoutubeMusic(url) {
                     }
                 }
 
-                if ((!ytArtist || !ytArtist.includes(music.artist.name)) && !ytFullTitle.includes(music.artist.name)) {
-                    break find;
-                }
+                artists = music.artist.name.replace(/\(.*\)/gi, "");
 
-                /*artists = music.artists.pop().name;
-                for (let artist of music.artists)
-                    artists += "," + artist.name;
-
-                artists = artists.replace(/\(.*\)/gi, "");
-
+                const totalArtists = artists.split(",").length;
                 let foundArtists = 0;
                 for (let artist of artists.split(",")) {
                     artist = artist.name;
@@ -204,16 +198,16 @@ async function getYoutubeMusic(url) {
                         foundArtists++;
                 }
 
-                let probability = 100 / music.artists.length * foundArtists;
+                let probability = 100 / totalArtists * foundArtists;
                 if (probability < deviation) {
-                    if (music.artists.length > 2 && probability < 50) {
+                    if (totalArtists > 2 && probability < 50) {
                         let length = getBiggerLength(ytArtist, artists);
 
                         if (100 / length * (length - levenshtein.distance(ytArtist, artists)) < deviation) {
                             break find;
                         }
                     }
-                }*/
+                }
 
                 found = true;
             }

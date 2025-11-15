@@ -208,7 +208,7 @@ ipcMain.on("yt-search", async (event, search) => {
     await ytMusic.initialize();
 
     try {
-        const results = await ytMusic.search(search);
+        const results = await ytMusic.searchSongs(search);
 
         win.webContents.send("yt-results", results);
     } catch (e) {
