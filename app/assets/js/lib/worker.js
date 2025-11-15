@@ -143,33 +143,35 @@ async function getYoutubeMusic(url) {
         let music = await getYouTubeMusicSearch(ytFullTitle);
         let artists = null, found = false;
 
+        console.log(music);
+
         find: {
             if (music && Object.keys(music).length) {
-                music.title = music.title.replace(ytFilter, "").trim();
+                music.name = music.name.replace(ytFilter, "").trim();
 
                 let duration = result.duration / 1000;
                 if (contains(ytTitle, "(remix)")) {
-                    if (!contains(music.title, "(remix)")) {
+                    if (!contains(music.name, "(remix)")) {
                         if (subtractSmallerNumber(music.duration.totalSeconds, duration) > 2) {
                             break find;
                         }
 
-                        music.title = music.title += " remix";
+                        music.name = music.name += " remix";
                     }
                 }
 
-                if (subtractSmallerNumber(music.duration.totalSeconds, duration) > 6) {
+                /*if (subtractSmallerNumber(music.duration.totalSeconds, duration) > 6) {
                     break find;
+                }*/
+
+                if (contains(music.name, delimiter)) {
+                    let temp = music.name.split(delimiter);
+
+                    music.artist.name = temp[0];
+                    music.name = temp[1];
                 }
 
-                if (contains(music.title, delimiter)) {
-                    let temp = music.title.split(delimiter);
-
-                    music.artists[0].name = temp[0];
-                    music.title = temp[1];
-                }
-
-                let sorted = getSortedLength(ytTitle, music.title);
+                let sorted = getSortedLength(ytTitle, music.name);
                 let regexEscaped = escapeRegExp(sorted[1]);
 
                 let split = regexEscaped.split("\\ ");
@@ -177,14 +179,18 @@ async function getYoutubeMusic(url) {
 
                 let count = matchCount(sorted[0], join);
                 if (!contains(sorted[0], join) || 100 / split.length * count < deviation) {
-                    let length = getBiggerLength(ytTitle, music.title);
+                    let length = getBiggerLength(ytTitle, music.name);
 
-                    if (100 / length * (length - levenshtein.distance(ytTitle, music.title)) < deviation) {
+                    if (100 / length * (length - levenshtein.distance(ytTitle, music.name)) < deviation) {
                         break find;
                     }
                 }
 
-                artists = music.artists.pop().name;
+                if ((!ytArtist || !ytArtist.includes(music.artist.name)) && !ytFullTitle.includes(music.artist.name)) {
+                    break find;
+                }
+
+                /*artists = music.artists.pop().name;
                 for (let artist of music.artists)
                     artists += "," + artist.name;
 
@@ -207,13 +213,13 @@ async function getYoutubeMusic(url) {
                             break find;
                         }
                     }
-                }
+                }*/
 
                 found = true;
             }
         }
 
-        if (found) return "https://music.youtube.com/watch?v=" + music.youtubeId;
+        if (found) return "https://music.youtube.com/watch?v=" + music.videoId;
         else return null;
     }).catch(() => null);
 }

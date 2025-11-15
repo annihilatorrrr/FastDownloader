@@ -202,10 +202,13 @@ ipcMain.on("disableAutostart", () => {
 });
 
 ipcMain.on("yt-search", async (event, search) => {
-    const ytMusic = await getYtMusic();
+    const ytMusicApi = await getYtMusic();
+    const ytMusic = new ytMusicApi();
+
+    await ytMusic.initialize();
 
     try {
-        const results = await ytMusic.searchMusics(search);
+        const results = await ytMusic.search(search);
 
         win.webContents.send("yt-results", results);
     } catch (e) {
@@ -214,8 +217,8 @@ ipcMain.on("yt-search", async (event, search) => {
 });
 
 async function getYtMusic() {
-    // Dynamically import ESM module from CommonJS
-    return await import("node-youtube-music");
+    const module = await import("ytmusic-api");
+    return module.default;  // <- return the class
 }
 
 function closeToTray(event) {
